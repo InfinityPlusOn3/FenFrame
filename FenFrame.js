@@ -1,127 +1,6 @@
 
 var fenFrame = {};
 
-fenFrame.evolutionVNotch = function (depth, position, otherSide) {
-    // Joint type of 1 = VNotch
-    var m_depth = depth || 67;
-    var m_bottom = otherSide ? 1 : 0;
-    var m_position = position || 0;
-
-    return new fenFrame.vNotch(m_depth, m_position, m_bottom);
-};
-
-
-fenFrame.evolutionSectionPiece = function (endPrepID1,
-                                            endPrepID2,
-                                            lengthInternal,
-                                            machineSawReversed,
-                                            rebateFacing,
-                                            width,
-                                            shape,
-                                            rebateDepth) {
-
-    // TODO - clean this shit up
-    if (typeof lengthInternal == "undefined") { throw "Missing length internal"; } else { lengthInternal = Number(lengthInternal); };
-    if (typeof machineSawReversed == "undefined") {
-        throw "Missing saw reversed";
-    } else {
-        machineSawReversed == "True" ? machineSawReversed = 1 : machineSawReversed = 0;
-    }
-
-    if (typeof rebateFacing == "undefined") {
-        throw "Missing rebateFacing";
-    } else {
-        rebateFacing == "0" ? rebateFacing = 1 : rebateFacing = 0;
-    }
-    if (typeof width == "undefined") { throw "Missing width"; } else { width = Number(width); };
-
-    var m_lengthInternal = lengthInternal;
-    var m_machineSawReversed = machineSawReversed;
-    var m_rebateFacing = rebateFacing;
-    var m_width = width < 149 ? width : 30;
-    var m_tmp;
-    var m_shape = shape || "";
-    var m_rebateDepth = rebateDepth ? Number(rebateDepth) : 20;
-    var m_options = {};
-
-    switch (m_shape) {
-        case "L":
-            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing);
-            break;
-        case "T":
-            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
-            m_options.rebateBot = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
-            break;
-        case "Z":
-            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
-            m_options.rebateBot = new fenFrame.rebate(m_rebateDepth, m_rebateFacing ? 0 : 1);
-            break;
-    }
-
-    endPrepID1 = Number(endPrepID1);
-    endPrepID2 = Number(endPrepID2);
-
-    /*
-    if (m_machineSawReversed == 1) {
-    // switch end preps
-    m_tmp = endPrepID1;
-    endPrepID1 = endPrepID2;
-    endPrepID2 = m_tmp;
-    }
-    */
-
-    switch (endPrepID1) {
-        case 1: // Mitre
-            m_endPrepID1 = 2;
-            break;
-        case 2: // Square
-            m_endPrepID1 = 1;
-            break;
-        case 3: // Rev Mitre
-            m_endPrepID1 = 3;
-            break;
-        case 7: // Butt V Top 
-            m_endPrepID1 = 4;
-            break;
-        case 4: // Angle                -- Not yet implemented
-        case 5: // Opp mitre            -- Not yet implemented
-        case 6: // Milled               -- Not yet implemented
-        case 8: // Butt V Bottom        -- Not yet implemented
-        case 9: // Butt V top & Bottom  -- Not yet implemented
-        case 10: // Rev Mitre Angled    -- Not yet implemented
-            throw "Not yet implemented";
-            break;
-        default:
-            throw "Not yet implemented";
-    }
-
-    switch (endPrepID2) {
-        case 1: // Mitre
-            m_endPrepID2 = 2;
-            break;
-        case 2: // Square
-            m_endPrepID2 = 1;
-            break;
-        case 3: // Rev Mitre
-            m_endPrepID2 = 3;
-            break;
-        case 7: // Butt V Top 
-            m_endPrepID2 = 4;
-            break;
-        case 4: // Angle                -- Not yet implemented
-        case 5: // Opp mitre            -- Not yet implemented
-        case 6: // Milled               -- Not yet implemented
-        case 8: // Butt V Bottom        -- Not yet implemented
-        case 9: // Butt V top & Bottom  -- Not yet implemented
-        case 10: // Rev Mitre Angled    -- Not yet implemented
-            throw "Not yet implemented";
-            break;
-        default:
-            throw "Not yet implemented";
-    }
-
-    return new fenFrame.sectionPiece(m_lengthInternal, m_width, m_endPrepID1, m_endPrepID2, m_options);
-};
 
 fenFrame.sectionPiece = function(lengthInternal, sizeWidth, endPrepType1, endPrepType2, options) {
     // Private Properties/Methods
@@ -819,6 +698,162 @@ fenFrame.frameMember.prototype = {
 	}
 };
 
+
+fenFrame.evolutionVNotch = function (depth, position, otherSide) {
+    // Joint type of 1 = VNotch
+    var m_depth = depth || 67;
+    var m_bottom = otherSide ? 1 : 0;
+    var m_position = position || 0;
+
+    return new fenFrame.vNotch(m_depth, m_position, m_bottom);
+};
+
+
+fenFrame.evolutionSectionPiece = function (endPrepID1,
+                                            endPrepID2,
+                                            lengthInternal,
+                                            machineSawReversed,
+                                            rebateFacing,
+                                            width,
+                                            shape,
+                                            colourDescription,
+                                            rebateDepth) {
+
+    _evolutionColour = function (colour) {
+        // Map Evolution colour description to Hex value
+        var m_colour = colour || "";
+        var m_hexColour;
+
+        m_colour = m_colour.split(" ")[0].toUpperCase();
+        switch (m_colour) {
+            case "WHITE":
+                m_hexColour = "#ffffff";
+                break;
+            case "MAHOGANY": // RGB : 128 64 0
+                m_hexColour = "#80400";
+                break;
+            case "OAK": // RGB : 255 128 64
+                m_hexColour = "#ff8040";
+                break;
+            case "ROSEWOOD": // RGB : 128 0 0 
+                m_hexColour = "#800000";
+                break;
+            case "CREAM": // RGB : 242 239 111
+                m_hexColour = "#F2EF6F";
+                break;
+            case "BLACK": // RGB : 0 0 0 
+                m_hexColour = "#000000";
+                break;
+            case "GREEN": // RGB : 0 128 0
+                m_hexColour = "#008000";
+                break;
+            case "BLUE": // RGB : 0 0 128
+                m_hexColour = "#00080";
+                break;
+            case "RED": // RGB : 255 0 0 
+                m_hexColour = "#FF0000";
+                break;
+            default:
+                m_hexColour = "#FFFFFF";
+        }
+        
+        return m_hexColour;
+    };
+
+    // TODO - clean this shit up
+    if (typeof lengthInternal == "undefined") { throw "Missing length internal"; } else { lengthInternal = Number(lengthInternal); };
+    if (typeof machineSawReversed == "undefined") {
+        throw "Missing saw reversed";
+    } else {
+        machineSawReversed == "True" ? machineSawReversed = 1 : machineSawReversed = 0;
+    }
+
+    if (typeof rebateFacing == "undefined") {
+        throw "Missing rebateFacing";
+    } else {
+        rebateFacing == "0" ? rebateFacing = 1 : rebateFacing = 0;
+    }
+    if (typeof width == "undefined") { throw "Missing width"; } else { width = Number(width); };
+
+    var m_lengthInternal = lengthInternal;
+    var m_machineSawReversed = machineSawReversed;
+    var m_rebateFacing = rebateFacing;
+    var m_width = width < 149 ? width : 30;
+    var m_tmp;
+    var m_shape = shape || "";
+    var m_rebateDepth = rebateDepth ? Number(rebateDepth) : 20;
+    var m_options = {};
+
+    m_options.fillColour = _evolutionColour(colourDescription);
+    switch (m_shape) {
+        case "L":
+            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing);
+            break;
+        case "T":
+            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
+            m_options.rebateBot = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
+            break;
+        case "Z":
+            m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing); ;
+            m_options.rebateBot = new fenFrame.rebate(m_rebateDepth, m_rebateFacing ? 0 : 1);
+            break;
+    }
+
+    endPrepID1 = Number(endPrepID1);
+    endPrepID2 = Number(endPrepID2);
+
+    switch (endPrepID1) {
+        case 1: // Mitre
+            m_endPrepID1 = 2;
+            break;
+        case 2: // Square
+            m_endPrepID1 = 1;
+            break;
+        case 3: // Rev Mitre
+            m_endPrepID1 = 3;
+            break;
+        case 7: // Butt V Top 
+            m_endPrepID1 = 4;
+            break;
+        case 4: // Angle                -- Not yet implemented
+        case 5: // Opp mitre            -- Not yet implemented
+        case 6: // Milled               -- Not yet implemented
+        case 8: // Butt V Bottom        -- Not yet implemented
+        case 9: // Butt V top & Bottom  -- Not yet implemented
+        case 10: // Rev Mitre Angled    -- Not yet implemented
+            throw "Not yet implemented";
+            break;
+        default:
+            throw "Not yet implemented";
+    }
+
+    switch (endPrepID2) {
+        case 1: // Mitre
+            m_endPrepID2 = 2;
+            break;
+        case 2: // Square
+            m_endPrepID2 = 1;
+            break;
+        case 3: // Rev Mitre
+            m_endPrepID2 = 3;
+            break;
+        case 7: // Butt V Top 
+            m_endPrepID2 = 4;
+            break;
+        case 4: // Angle                -- Not yet implemented
+        case 5: // Opp mitre            -- Not yet implemented
+        case 6: // Milled               -- Not yet implemented
+        case 8: // Butt V Bottom        -- Not yet implemented
+        case 9: // Butt V top & Bottom  -- Not yet implemented
+        case 10: // Rev Mitre Angled    -- Not yet implemented
+            throw "Not yet implemented";
+            break;
+        default:
+            throw "Not yet implemented";
+    }
+
+    return new fenFrame.sectionPiece(m_lengthInternal, m_width, m_endPrepID1, m_endPrepID2, m_options);
+};
 
 
 
