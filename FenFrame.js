@@ -699,10 +699,44 @@ fenFrame.frameMember.prototype = {
 };
 
 
+fenFrame.evolutionFillColour = {
+    // Override this for your own colour mapping
+    // Returns hex number used for background fill colour
+    WHITE: '#ffffff',
+    MAHOGANY: '#80400',         // RGB : 128 64 0
+    OAK: '#ff8040',             // RGB : 255 128 64
+    ROSEWOOD: '#800000',        // RGB : 128 0 0
+    CREAM: '#F2EF6F',           // RGB : 242 239 111
+    BLACK: '#000000',           // RGB : 0 0 0
+    GREEN: '#008000',           // RGB : 0 128 0
+    BLUE: '#000080',            // RGB : 0 0 128
+    RED: '#FF0000'              // RGB : 255 0 0
+};
+
+fenFrame.evolutionPenColour = {
+    // Override this for your own colour mapping
+    // Returns colour for lines based on background colour
+    // BACKGROUND COLOUR: 'pen colour in hex'
+    WHITE: '#000000',
+    MAHOGANY: '#000000',         
+    OAK: '#000000',             
+    ROSEWOOD: '#000000',        
+    CREAM: '#000000',           
+    BLACK: '#ffffff',           
+    GREEN: '#000000',           
+    BLUE: '#000000',            
+    RED: '#F000000'              
+};
+
 fenFrame.evolutionVNotch = function (depth, position, otherSide) {
     // Joint type of 1 = VNotch
     var m_depth = depth || 67;
-    var m_bottom = otherSide ? 1 : 0;
+    var m_bottom = 0;
+    if (( otherSide == "True" ) || ( otherSide == "TRUE" ) || ( otherSide == "1" ) ) {
+        m_bottom = 1;
+    } else if (( otherSide == "False" ) || ( otherSide == "FALSE" ) || ( otherSide == "0" ) ) {
+        m_bottom = 0;
+    }
     var m_position = position || 0;
 
     return new fenFrame.vNotch(m_depth, m_position, m_bottom);
@@ -717,47 +751,21 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
                                             width,
                                             shape,
                                             colourDescription,
-                                            rebateDepth) {
+                                            rebateDepth,
+                                            vNotches) {
 
-    _evolutionColour = function (colour) {
-        // Map Evolution colour description to Hex value
-        var m_colour = colour || "";
-        var m_hexColour;
+    _evolutionFillColour = function (evoColour) {
+        var m_colour = evoColour || "";
 
         m_colour = m_colour.split(" ")[0].toUpperCase();
-        switch (m_colour) {
-            case "WHITE":
-                m_hexColour = "#ffffff";
-                break;
-            case "MAHOGANY": // RGB : 128 64 0
-                m_hexColour = "#80400";
-                break;
-            case "OAK": // RGB : 255 128 64
-                m_hexColour = "#ff8040";
-                break;
-            case "ROSEWOOD": // RGB : 128 0 0 
-                m_hexColour = "#800000";
-                break;
-            case "CREAM": // RGB : 242 239 111
-                m_hexColour = "#F2EF6F";
-                break;
-            case "BLACK": // RGB : 0 0 0 
-                m_hexColour = "#000000";
-                break;
-            case "GREEN": // RGB : 0 128 0
-                m_hexColour = "#008000";
-                break;
-            case "BLUE": // RGB : 0 0 128
-                m_hexColour = "#00080";
-                break;
-            case "RED": // RGB : 255 0 0 
-                m_hexColour = "#FF0000";
-                break;
-            default:
-                m_hexColour = "#FFFFFF";
-        }
-        
-        return m_hexColour;
+        return fenFrame.evolutionFillColour[m_colour] || "#ffffff";
+    };
+
+    _evolutionPenColour = function (evoColour) {
+        var m_colour = evoColour || "";
+
+        m_colour = m_colour.split(" ")[0].toUpperCase();
+        return fenFrame.evolutionPenColour[m_colour] || "#000000";
     };
 
     // TODO - clean this shit up
@@ -784,7 +792,8 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
     var m_rebateDepth = rebateDepth ? Number(rebateDepth) : 20;
     var m_options = {};
 
-    m_options.fillColour = _evolutionColour(colourDescription);
+    m_options.fillColour = _evolutionFillColour(colourDescription);
+    m_options.penColour = _evolutionPenColour(colourDescription);
     switch (m_shape) {
         case "L":
             m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing);
@@ -852,6 +861,9 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
             throw "Not yet implemented";
     }
 
+    if (vNotches) {
+        m_options.vNotches = vNotches;
+    }
     return new fenFrame.sectionPiece(m_lengthInternal, m_width, m_endPrepID1, m_endPrepID2, m_options);
 };
 
