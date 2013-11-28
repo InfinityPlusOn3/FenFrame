@@ -2,7 +2,8 @@
 <html>
 
 <head>
-<script src="FenFrame.js" type="text/javascript"></script>
+<script src="C:\BM\webapps\dev\Evonet2\Includes\FenFrame.js" type="text/javascript"></script>
+
 <script type="text/javascript">
 var test1 = function() {
 	var aOptions = {};
@@ -148,6 +149,17 @@ var test13 = function() {
 	return aMember.getSVG();
 }
 
+var test14 = function () {
+    // butt V bot
+    var aOptions = {};
+    aOptions.rebateTop = new fenFrame.rebate(20, 0);
+    aOptions.rebateBot = new fenFrame.rebate(20, 0);
+
+    var aSection = new fenFrame.sectionPiece(600, 67, 5, 5, aOptions);
+    return aSection.getSVG({ align: "center" });
+};
+
+
 </script>
 </head>
 
@@ -212,7 +224,7 @@ var test13 = function() {
 	document.write( test10());
 </script>	
 </div>
--->
+
 <div style="display:block;height: 100px;">
 <script type="text/javascript">
 	//document.write( test11());
@@ -228,6 +240,15 @@ var test13 = function() {
 <div style="display:block;width:600px;height: 100px;">
 <script type="text/javascript">
 	document.write( test13());
+</script>	
+</div>
+-->
+
+<div style="display:block;width:1200px;height: 100px;border solid 2px black;background-color:Blue;">
+<script type="text/javascript">
+    document.write(test14());
+
+    alert(test14());
 </script>	
 </div>
 
