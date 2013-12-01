@@ -5,7 +5,6 @@ var fenFrame = {};
 fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPrepType2, options) {
     // Private Properties/Methods
 
-
     this.lengthInternal = lengthInternal;
     this.sizeWidth = sizeWidth;
     this.endPrepType1 = endPrepType1;
