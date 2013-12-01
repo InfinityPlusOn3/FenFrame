@@ -540,11 +540,11 @@ fenFrame.svgWrapper = function (svgbody, width, height, options) {
     var m_align = "xMidYMin";
 
     if (options) {
-        if ((options.align == "centre") || (options.align == "center") ) {
+        if ((options.align == "centre") || (options.align == "center")) {
             m_align = "xMidYMin";
-        } else if ( options.align == "left" ) {
+        } else if (options.align == "left") {
             m_align = "xMinYMin";
-        } else if ( options.align == "right" ) {
+        } else if (options.align == "right") {
             m_align = "xMaxYMin";
         }
     }
