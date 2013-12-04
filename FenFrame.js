@@ -1,9 +1,52 @@
 
 var fenFrame = {};
 
-
 fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPrepType2, options) {
     // Private Properties/Methods
+    function _GetPeak(size, endPrep, sizeWidth, yNotchDepth, angle) {
+        var m_result = 0;
+
+        switch (endPrep) {
+            case 1: m_result = 0;
+                break;
+            case 2: m_result += sizeWidth;
+                break;
+            case 3: m_result += (sizeWidth / 2);
+                break;
+            case 4:
+            case 5: m_result += yNotchDepth;
+                break;
+            case 6: m_result += _getEndPrepAngleOffset(angle, this.sizeWidth);
+                break;
+        }
+        return m_result;
+    };
+
+    function _getEndPrepAngleOffset(angle, width) {
+        Math.degrees = function (rad) {
+            return rad * (180 / Math.PI);
+        };
+        Math.radians = function (deg) {
+            return deg * (Math.PI / 180);
+        };
+        return Math.round(width * Math.tan(Math.radians(90 - angle)));
+    };
+
+
+    function _stack() {
+        this.stac = new Array();
+        this.pop = function () {
+            return this.stac.pop();
+        };
+        this.push = function (item) {
+            this.stac.push(item);
+        };
+    }
+
+    function _line(x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+    }
 
     this.lengthInternal = lengthInternal;
     this.sizeWidth = sizeWidth;
@@ -31,52 +74,22 @@ fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPr
         this.vNotches = options.vNotches || [];
         this.endPrepAngle1 = options.endPrepAngle1 || 0;
         this.endPrepAngle2 = options.endPrepAngle2 || 0;
+
+        this.ApertureX = options.apertureX || 0;
+        this.ApertureY = options.apertureY || 0;
+        this.Component = options.component || "";
+        this.EndPrepAbbreviation1 = options.endPrepAbbreviation1 || "";
+        this.EndPrepAbbreviation2 = options.endPrepAbbreviation2 || "";
+        this.StartX = options.startX || 0;
+        this.StartY = options.startY || 0;
+        this.EndX = options.endX || 0;
+        this.EndY = options.endY || 0;
+        this.StockCode = options.stockCode || "";
+        this.StockDescription = options.stockDescription || "";
+        this.Weight = options.weight || 0;
     };
     this.offSet = 0;
 
-    function _GetPeak(size, endPrep, sizeWidth, yNotchDepth, angle) {
-        var m_result = 0;
-
-        switch (endPrep) {
-            case 1: m_result = 0;
-                break;
-            case 2: m_result += sizeWidth;
-                break;
-            case 3: m_result += (sizeWidth / 2);
-                break;
-            case 4:
-            case 5: m_result += yNotchDepth;
-                break;
-            case 6: m_result += _getEndPrepAngleOffset( angle );
-            	break;
-        }
-        return m_result;
-    };
-    
-    function _getEndPrepAngleOffset(angle) {
-    	var m_tmp = 0;
-        m_tmp = 90 - angle;
-        m_tmp = Math.tan( m_tmp * (Math.PI / 180));
-        m_tmp = m_tmp * (180 / Math.PI);
-        
-        return Math.round( m_tmp);    	
-    }; 
-
-    
-    function _stack() {
-        this.stac = new Array();
-        this.pop = function () {
-            return this.stac.pop();
-        };
-        this.push = function (item) {
-            this.stac.push(item);
-        };
-    }
-
-    function _line(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
-    }
 
     this.endPrep = function (aStack, endPrepType, pos) {
         var m_sizeWidthHalf = Math.round(this.sizeWidth / 2);
@@ -88,8 +101,10 @@ fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPr
         var m_x = 0;
         var m_y = 0;
         var m_tmp = 0;
+        var m_tmp1 = 0;
+        var m_tmp2 = 0;
 
-        
+
         switch (endPrepType) {
             case 1:
                 // Square 90
@@ -108,6 +123,7 @@ fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPr
             case 2:
                 // Mitre 45
                 if (pos == 1) {
+
                     m_y = this.sizeWidth;
                     this.myStackPath.push(new _line(m_x, m_y));
                     m_x = this.sizeWidth;
@@ -332,9 +348,8 @@ fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPr
                         m_endY = this.sizeWidth - this.rebateBot.size;
                         aStack.push(new fenFrame.edge(m_startX, m_startY, m_endX, m_endY, this.rebateBot.facing ? { lineType: 'solid'} : { lineType: 'dotted' }));
                     }
-
-
                     this.offSet = this.yNotchDepth1;
+
                 } else if (pos == 2) {
                     m_x = this.offSet + this.yNotchDepth2;
                     m_y = 0;
@@ -373,51 +388,67 @@ fenFrame.sectionPiece = function (lengthInternal, sizeWidth, endPrepType1, endPr
                 }
                 break;
             case 6:
-            	// Angle
-            	if ((!(this.endPrepAngle1 > 0 )) || (!(this.endPrepAngle2 > 0 ))) {
-            		throw "Invalid endPrepAngle";
-            	}
-            	            	
-            	if (pos == 1) {
+                // Angle
+                if ((!(this.endPrepAngle1 > 0)) || (!(this.endPrepAngle2 > 0))) {
+                    throw "Invalid endPrepAngle";
+                }
+
+                if (pos == 1) {
                     m_y = this.sizeWidth;
                     this.myStackPath.push(new _line(m_x, m_y));
-                                        
-                    m_x = _getEndPrepAngleOffset(this.endPrepAngle1);
+
+                    m_x = _getEndPrepAngleOffset(this.endPrepAngle1, this.sizeWidth);
                     m_y = 0;
                     this.myStackPath.push(new _line(m_x, m_y));
 
-                    /*
                     // rebate 1
                     if (this.rebateTop) {
-                        m_startX = this.sizeWidth - this.rebateTop.size;
+                        m_startX = m_x - _getEndPrepAngleOffset(this.endPrepAngle1, this.rebateTop.size);
                         m_startY = this.rebateTop.size;
-                        m_endX = this.sizeWidth;
+                        m_endX = m_x;
                         m_endY = this.rebateTop.size;
                         aStack.push(new fenFrame.edge(m_startX, m_startY, m_endX, m_endY, this.rebateTop.facing ? { lineType: 'solid'} : { lineType: 'dotted' }));
                     }
 
                     // rebate 2
                     if (this.rebateBot) {
-                        m_startX = this.rebateBot.size;
+                        m_startX = m_x - _getEndPrepAngleOffset(this.endPrepAngle1, this.sizeWidth - this.rebateBot.size);
                         m_startY = this.sizeWidth - this.rebateBot.size;
+                        m_endX = m_x;
                         m_endY = this.sizeWidth - this.rebateBot.size;
                         aStack.push(new fenFrame.edge(m_startX, m_startY, m_endX, m_endY, this.rebateBot.facing ? { lineType: 'solid'} : { lineType: 'dotted' }));
                     }
-                    */
-
                     this.offSet = m_x;
-            		
-            	} else if (pos == 2) {
-            		m_x = this.offSet;
-            		m_y = 0;
+
+                } else if (pos == 2) {
+                    m_x = this.offSet;
+                    m_y = 0;
                     this.myStackPath.push(new _line(m_x, m_y));
-                                        
-                    m_x += _getEndPrepAngleOffset(this.endPrepAngle2);
+
+                    m_x += _getEndPrepAngleOffset(this.endPrepAngle2, this.sizeWidth);
                     m_y = this.sizeWidth;
                     this.myStackPath.push(new _line(m_x, m_y));
+
+                    // rebate 1
+                    if (this.rebateTop) {
+                        m_startX = this.offSet;
+                        m_startY = this.rebateTop.size;
+                        m_endX = this.offSet + _getEndPrepAngleOffset(this.endPrepAngle2, this.rebateTop.size);
+                        m_endY = this.rebateTop.size;
+                        aStack.push(new fenFrame.edge(m_startX, m_startY, m_endX, m_endY, this.rebateTop.facing ? { lineType: 'solid'} : { lineType: 'dotted' }));
+                    }
+
+                    // rebate 2
+                    if (this.rebateBot) {
+                        m_startX = this.offSet;
+                        m_startY = this.sizeWidth - this.rebateBot.size;
+                        m_endX = this.offSet + _getEndPrepAngleOffset(this.endPrepAngle2, this.sizeWidth - this.rebateBot.size);
+                        m_endY = this.sizeWidth - this.rebateBot.size;
+                        aStack.push(new fenFrame.edge(m_startX, m_startY, m_endX, m_endY, this.rebateBot.facing ? { lineType: 'solid'} : { lineType: 'dotted' }));
+                    }
                     this.offSet = m_x;
-            	}
-            	break;
+                }
+                break;
         }
         return aStack;
     };
@@ -741,31 +772,29 @@ fenFrame.vNotch.prototype = {
 
 // Frame member class
 fenFrame.frameMember = function(sectionPieces, options) {
-	//Private Properties/Methods
+    //Private Properties/Methods
+    function _stack() {
+        this.stac = new Array();
+        this.pop = function () {
+            return this.stac.pop();
+        };
+        this.push = function (item) {
+            this.stac.push(item);
+        };
+    }
+
+    function _line(x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+    }
+
 	this.width = 0;
 	this.height = 0;
 	
 	if (options) {
 		this.reinforcingPiece = options.reinforcingPiece;		// use sectionPiece class
 	};
-	this.offSet = 0;
-	
-	
-	function _stack( ) {
-		this.stac = new Array();
-		this.pop = function() {
-  			return this.stac.pop();
-		};
-		this.push = function(item) {
-  			this.stac.push(item);
-  		};	
-	}
-	
-	function _line(x, y) {
-		this.x = x || 0;
-		this.y = y || 0;
-	}
-	
+	this.offSet = 0;	
 	this.mySectionStack = new _stack();
 	this.myReinforcingStack = new _stack();
 	
@@ -898,8 +927,8 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
                                             shape,
                                             colourDescription,
                                             rebateDepth,
-                                            vNotches) {
-
+                                            vNotches,
+                                            options) {
     _evolutionFillColour = function (evoColour) {
         var m_colour = evoColour || "";
 
@@ -920,6 +949,7 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
                 return 2;
                 break;
             case 2: // Square
+            case 6: // Milled
                 return 1;
                 break;
             case 3: // Rev Mitre
@@ -931,9 +961,10 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
             case 8: // Butt V Bottom 
                 return 5;
                 break;
-            case 4: // Angle                -- Not yet implemented
+            case 4: // Angle
+                return 6
+                break;
             case 5: // Opp mitre            -- Not yet implemented
-            case 6: // Milled               -- Not yet implemented
             case 9: // Butt V top & Bottom  -- Not yet implemented
             case 10: // Rev Mitre Angled    -- Not yet implemented
                 throw "Not yet implemented";
@@ -971,6 +1002,19 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
 
     m_options.fillColour = _evolutionFillColour(colourDescription);
     m_options.penColour = _evolutionPenColour(colourDescription);
+    m_options.apertureX = options.apertureX || 0;
+    m_options.apertureY = options.apertureY || 0;
+    m_options.component = options.componentSpecific || "";
+    m_options.endPrepAbbreviation1 = options.endPrepAbbreviation1 || "";
+    m_options.endPrepAbbreviation2 = options.endPrepAbbreviation2 || "";
+    m_options.StartX = options.positionStartX || 0;
+    m_options.StartY = options.positionStartY || 0;
+    m_options.EndX = options.positionEndX || 0;
+    m_options.EndY = options.positionEndY || 0;
+    m_options.stockCode = options.stockCode || "";
+    m_options.stockDescription = options.stockDescription || "";
+    m_options.weight = options.weight || 0;
+
     switch (m_shape) {
         case "L":
             m_options.rebateTop = new fenFrame.rebate(m_rebateDepth, m_rebateFacing);
@@ -999,7 +1043,6 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
     endPrepID2 = Number(endPrepID2);
     m_endPrepID2 = _evolutionEndPrepMap(endPrepID2);
 
-
     if (vNotches) {
         if (m_rebateFacing == 0) {
             // We need to flip the prep position.
@@ -1019,5 +1062,16 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
     return new fenFrame.sectionPiece(m_lengthInternal, m_width, m_endPrepID1, m_endPrepID2, m_options);
 };
 
+fenFrame.evolutionFrameMembers = function (sectionPieces) {
+    // Expects an array of sections pieces
+    if (!(sectionPieces)) {
+        return;
+    }
 
+    // Sort by Component Specific
+    for (var m_i = 0; m_i < sectionPieces.length; m_i++) {
+        
+    }
+
+};
 
