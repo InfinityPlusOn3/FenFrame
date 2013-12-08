@@ -814,8 +814,8 @@ fenFrame.frameMember = function(sectionPieces, options) {
 
 //Public Properties/Methods
 fenFrame.frameMember.prototype = {
-	getSVG : function() {
-		return fenFrame.svgWrapper(this.getSVGitem(), this.width, this.height );
+	getSVG : function(options) {
+		return fenFrame.svgWrapper(this.getSVGitem(), this.width, this.height, options );
 	},
 	getSVGitem : function() {
     var m_svg = "";
@@ -1000,20 +1000,24 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
     var m_rebateDepth = rebateDepth ? Number(rebateDepth) : 20;
     var m_options = {};
 
+
     m_options.fillColour = _evolutionFillColour(colourDescription);
     m_options.penColour = _evolutionPenColour(colourDescription);
-    m_options.apertureX = options.apertureX || 0;
-    m_options.apertureY = options.apertureY || 0;
-    m_options.component = options.componentSpecific || "";
-    m_options.endPrepAbbreviation1 = options.endPrepAbbreviation1 || "";
-    m_options.endPrepAbbreviation2 = options.endPrepAbbreviation2 || "";
-    m_options.StartX = options.positionStartX || 0;
-    m_options.StartY = options.positionStartY || 0;
-    m_options.EndX = options.positionEndX || 0;
-    m_options.EndY = options.positionEndY || 0;
-    m_options.stockCode = options.stockCode || "";
-    m_options.stockDescription = options.stockDescription || "";
-    m_options.weight = options.weight || 0;
+
+    if (options) {
+        m_options.apertureX = options.apertureX || 0;
+        m_options.apertureY = options.apertureY || 0;
+        m_options.component = options.componentSpecific || "";
+        m_options.endPrepAbbreviation1 = options.endPrepAbbreviation1 || "";
+        m_options.endPrepAbbreviation2 = options.endPrepAbbreviation2 || "";
+        m_options.StartX = options.positionStartX || 0;
+        m_options.StartY = options.positionStartY || 0;
+        m_options.EndX = options.positionEndX || 0;
+        m_options.EndY = options.positionEndY || 0;
+        m_options.stockCode = options.stockCode || "";
+        m_options.stockDescription = options.stockDescription || "";
+        m_options.weight = options.weight || 0;
+    }
 
     switch (m_shape) {
         case "L":
@@ -1062,16 +1066,16 @@ fenFrame.evolutionSectionPiece = function (endPrepID1,
     return new fenFrame.sectionPiece(m_lengthInternal, m_width, m_endPrepID1, m_endPrepID2, m_options);
 };
 
-fenFrame.evolutionFrameMembers = function (sectionPieces) {
-    // Expects an array of sections pieces
-    if (!(sectionPieces)) {
-        return;
+fenFrame.evolutionFrameMember_Single = function (evolutionSectionPiece, options) {
+    var m_options = {};
+   
+
+    if (options) {
+        if ((options.isReinforced == "True") || (options.isReinforced == 1) || (options.isReinforced == "1")) {
+            m_options.reinforcingPiece = new fenFrame.sectionPiece(evolutionSectionPiece.lengthInternal, 10, 1, 1, {fillColour : '#FF0000' });
+        }
     }
 
-    // Sort by Component Specific
-    for (var m_i = 0; m_i < sectionPieces.length; m_i++) {
-        
-    }
-
+    return new fenFrame.frameMember([evolutionSectionPiece], m_options);
 };
 
